@@ -1,4 +1,5 @@
 import 'package:hive/hive.dart';
+part 'photo_hive_model.g.dart';
 
 @HiveType(typeId: 1)
 class PhotoHiveModel extends HiveObject {

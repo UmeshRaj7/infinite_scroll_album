@@ -1,6 +1,6 @@
 import 'package:hive/hive.dart';
 
-part '../hive_models.g.dart';
+part 'album_hive_model.g.dart';
 
 @HiveType(typeId: 0)
 class AlbumHiveModel extends HiveObject {
