@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:hive/hive.dart';
 
 import '../../models/models.dart';
+import '../models/hive_models/hive.dart';
 import 'album_repository.dart';
 
 class AlbumRepositoryImpl implements AlbumRepository {
@@ -16,7 +17,7 @@ class AlbumRepositoryImpl implements AlbumRepository {
     final start = (page - 1) * limit;
     final end = start + limit;
 
-    // Check if cached data exists for this range
+    // Check cached data for albums
     if (albumBox.length >= end) {
       return albumBox.values
           .skip(start)
@@ -45,30 +46,40 @@ class AlbumRepositoryImpl implements AlbumRepository {
     final start = (page - 1) * limit;
     final end = start + limit;
 
-    // Check if cached data exists for this range
+    // Retrieve all cached photos for the album
     final cachedPhotos =
         photoBox.values.where((photo) => photo.albumId == albumId).toList();
-    if (cachedPhotos.length >= end) {
-      return cachedPhotos
-          .skip(start)
-          .take(limit)
-          .map((photo) => Photo(id: photo.id, url: photo.url))
-          .toList();
+
+    // Sort cached photos by ID (or another consistent order)
+    cachedPhotos.sort((a, b) => a.id.compareTo(b.id));
+
+    // If the requested range is fully cached, return the data
+    if (cachedPhotos.isNotEmpty && cachedPhotos.length >= end) {
+      return cachedPhotos.skip(start).take(limit).map((photo) {
+        return Photo(id: photo.id, url: photo.url);
+      }).toList();
     }
 
-    // Fetch from API
+    // Fetch missing data from the API
     final response = await _dio.get(
       'https://jsonplaceholder.typicode.com/photos',
       queryParameters: {'albumId': albumId, '_start': start, '_limit': limit},
     );
 
     final photos = (response.data as List)
-        .map((json) => Photo(id: json['id'], url: json['url']))
+        .map((json) => Photo(id: json['id'], url: json['thumbnailUrl']))
         .toList();
 
+    // Cache the newly fetched photos
     for (var photo in photos) {
-      photoBox
-          .add(PhotoHiveModel(id: photo.id, albumId: albumId, url: photo.url));
+      // Ensure no duplicates in cache
+      if (!photoBox.values.any((cached) => cached.id == photo.id)) {
+        photoBox.add(PhotoHiveModel(
+          id: photo.id,
+          albumId: albumId,
+          url: photo.url,
+        ));
+      }
     }
 
     return photos;

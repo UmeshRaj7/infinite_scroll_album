@@ -1,6 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../domain/repo/album_repository.dart';
+import '../repos/album_repository.dart';
 import 'album_state.dart';
 
 class AlbumCubit extends Cubit<AlbumState> {
@@ -13,7 +12,7 @@ class AlbumCubit extends Cubit<AlbumState> {
           photosMap: {},
           isLoading: true,
           isFetchingMoreAlbums: false,
-          isFetchingMorePhotos: {},
+          isFetchingPhotosForAlbum: {},
           currentAlbumPage: 1,
         ));
 
@@ -27,6 +26,12 @@ class AlbumCubit extends Cubit<AlbumState> {
 
     final albums = await repository.getAlbums(
         page: state.currentAlbumPage, limit: itemsPerPage);
+
+    // Fetch photos for all the newly fetched albums
+    for (var album in albums) {
+      await fetchPhotos(album.id);
+    }
+
     emit(state.copyWith(
       albums: List.of(state.albums)..addAll(albums),
       isLoading: false,
@@ -36,20 +41,27 @@ class AlbumCubit extends Cubit<AlbumState> {
   }
 
   Future<void> fetchPhotos(int albumId, {int page = 1}) async {
-    if (state.isFetchingMorePhotos[albumId] == true) return;
+    if (state.isFetchingPhotosForAlbum[albumId] == true) return;
 
     emit(state.copyWith(
-      isFetchingMorePhotos: {...state.isFetchingMorePhotos, albumId: true},
+      isFetchingPhotosForAlbum: {
+        ...state.isFetchingPhotosForAlbum,
+        albumId: true
+      },
     ));
 
     final photos =
         await repository.getPhotos(albumId, page: page, limit: itemsPerPage);
+
     emit(state.copyWith(
       photosMap: {
         ...state.photosMap,
         albumId: List.of(state.photosMap[albumId] ?? [])..addAll(photos),
       },
-      isFetchingMorePhotos: {...state.isFetchingMorePhotos, albumId: false},
+      isFetchingPhotosForAlbum: {
+        ...state.isFetchingPhotosForAlbum,
+        albumId: false
+      },
     ));
   }
 }

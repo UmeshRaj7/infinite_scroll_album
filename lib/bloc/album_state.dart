@@ -5,7 +5,7 @@ class AlbumState {
   final Map<int, List<Photo>> photosMap;
   final bool isLoading;
   final bool isFetchingMoreAlbums;
-  final Map<int, bool> isFetchingMorePhotos;
+  final Map<int, bool> isFetchingPhotosForAlbum;
   final int currentAlbumPage;
 
   AlbumState({
@@ -13,7 +13,7 @@ class AlbumState {
     required this.photosMap,
     required this.isLoading,
     required this.isFetchingMoreAlbums,
-    required this.isFetchingMorePhotos,
+    required this.isFetchingPhotosForAlbum,
     required this.currentAlbumPage,
   });
 
@@ -22,7 +22,7 @@ class AlbumState {
     Map<int, List<Photo>>? photosMap,
     bool? isLoading,
     bool? isFetchingMoreAlbums,
-    Map<int, bool>? isFetchingMorePhotos,
+    Map<int, bool>? isFetchingPhotosForAlbum,
     int? currentAlbumPage,
   }) {
     return AlbumState(
@@ -30,7 +30,8 @@ class AlbumState {
       photosMap: photosMap ?? this.photosMap,
       isLoading: isLoading ?? this.isLoading,
       isFetchingMoreAlbums: isFetchingMoreAlbums ?? this.isFetchingMoreAlbums,
-      isFetchingMorePhotos: isFetchingMorePhotos ?? this.isFetchingMorePhotos,
+      isFetchingPhotosForAlbum:
+          isFetchingPhotosForAlbum ?? this.isFetchingPhotosForAlbum,
       currentAlbumPage: currentAlbumPage ?? this.currentAlbumPage,
     );
   }

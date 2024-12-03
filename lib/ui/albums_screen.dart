@@ -42,32 +42,34 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
       appBar: AppBar(
         title: const Text('Infinite Albums'),
       ),
-      body: BlocBuilder<AlbumCubit, AlbumState>(
-        builder: (context, state) {
-          if (state.isLoading && state.albums.isEmpty) {
-            return Center(child: CircularProgressIndicator());
-          }
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: BlocBuilder<AlbumCubit, AlbumState>(
+          builder: (context, state) {
+            if (state.isLoading && state.albums.isEmpty) {
+              return Center(child: CircularProgressIndicator());
+            }
 
-          return ListView.builder(
-            controller: _albumScrollController,
-            itemCount:
-                state.albums.length + (state.isFetchingMoreAlbums ? 1 : 0),
-            itemBuilder: (context, index) {
-              if (index >= state.albums.length) {
-                return Center(child: CircularProgressIndicator());
-              }
+            return ListView.builder(
+              controller: _albumScrollController,
+              itemCount:
+                  state.albums.length + (state.isFetchingMoreAlbums ? 1 : 0),
+              itemBuilder: (context, index) {
+                if (index >= state.albums.length) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-              final album = state.albums[index];
-              final photos = state.photosMap[album.id] ?? [];
+                final album = state.albums[index];
+                final photos = state.photosMap[album.id] ?? [];
 
-              return AlbumTile(
+                return AlbumTile(
                   album: album,
                   photos: photos,
-                  cubit: _cubit,
-                  albumState: state);
-            },
-          );
-        },
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }

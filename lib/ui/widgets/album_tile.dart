@@ -1,52 +1,49 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:infinite_photo_album/bloc/album_state.dart';
-
-import '../../bloc/album_cubit.dart';
 import '../../models/models.dart';
 
 class AlbumTile extends StatelessWidget {
   final Album album;
   final List<Photo> photos;
-  final AlbumCubit cubit;
-  final AlbumState albumState;
-  const AlbumTile(
-      {super.key,
-      required this.album,
-      required this.photos,
-      required this.cubit,
-      required this.albumState});
+  const AlbumTile({
+    super.key,
+    required this.album,
+    required this.photos,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(album.title,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: Text(album.title,
+              style:
+                  const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        ),
         SizedBox(
-          height: 100,
+          height: 100, // Set a fixed height for the photo row
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            itemCount: photos.length +
-                (albumState.isFetchingMorePhotos[album.id] == true ? 1 : 0),
-            itemBuilder: (context, photoIndex) {
-              if (photoIndex >= photos.length) {
-                cubit.fetchPhotos(album.id, page: (photos.length ~/ 20) + 1);
-                return const Center(child: CircularProgressIndicator());
-              }
+            itemBuilder: (context, index) {
+              // Wrap the index using modulus operator to loop photos infinitely
+              final photo = photos[index % photos.length];
 
-              final photo = photos[photoIndex];
               return Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: CachedNetworkImage(
                   imageUrl: photo.url,
-                  placeholder: (context, url) =>
-                      const CircularProgressIndicator(),
+                  placeholder: (context, url) => const Center(
+                    child: CircularProgressIndicator(),
+                  ),
                   errorWidget: (context, url, error) => const Icon(Icons.error),
+                  fit: BoxFit.cover,
                 ),
               );
             },
+            // A very high value for itemCount to simulate infinite scrolling
+            itemCount: 1000000,
           ),
         ),
       ],
