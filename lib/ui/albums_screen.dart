@@ -47,7 +47,7 @@ class _AlbumsScreenState extends State<AlbumsScreen> {
         child: BlocBuilder<AlbumCubit, AlbumState>(
           builder: (context, state) {
             if (state.isLoading && state.albums.isEmpty) {
-              return Center(child: CircularProgressIndicator());
+              return Center(child: const CircularProgressIndicator());
             }
 
             return ListView.builder(
